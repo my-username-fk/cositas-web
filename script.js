@@ -22,7 +22,6 @@ const P=[
 const $=id=>document.getElementById(id),fmt=v=>"$"+v.toLocaleString("es-CO");
 let cart={},cat="Todos",term="",srt="";
 try{cart=JSON.parse(localStorage.getItem("cositas-cart")||"{}")}catch(e){}
-"COSITAS".split("").forEach((l,i)=>{const s=document.createElement("span");s.textContent=i==1||i==5?l.toLowerCase():l;s.style.setProperty("--r",[-3,2,-2,3,-1,2,-3][i]+"deg");$("ransom").appendChild(s)});
 ["Todos",...new Set(P.map(p=>p.c))].forEach(c=>{const b=document.createElement("button");b.className="chip";b.textContent=c;b.setAttribute("aria-pressed",c==cat);b.onclick=()=>{cat=c;[...$("chips").children].forEach(x=>x.setAttribute("aria-pressed",x==b));render()};$("chips").appendChild(b)});
 const sug=$("sug"),qi=$("q"),pops=["Collares","Stickers","Audífonos","Regalos"];
 const nz=t=>t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
@@ -46,9 +45,9 @@ function save(){try{localStorage.setItem("cositas-cart",JSON.stringify(cart))}ca
 function drawCart(){
   const ids=Object.keys(cart).filter(k=>cart[k]>0),nm=$("cname").value.trim(),nt=$("cnote").value.trim();let t=0,n=0,sv=0,msg=[nm?`Hola Cositas, soy ${nm}. Quiero hacer este pedido:`:"Hola Cositas, quiero hacer este pedido:"];
   const up=P.filter(x=>!cart[x.id]).sort((a,b)=>b.s-a.s).slice(0,3).map(x=>`<div class="us"><img src="${x.img}" alt=""><div><b>${x.n}</b><div class="meta">${fmt(x.p)}</div></div><button data-add="${x.id}" aria-label="Agregar ${x.n}">+ Agregar</button></div>`).join("");
-  $("items").innerHTML=(ids.length?ids.map(k=>{const p=P[k],q=cart[k];t+=p.p*q;n+=q;sv+=(p.o-p.p)*q;msg.push(`• ${q} x ${p.n} (${fmt(p.p*q)})`);return `<div class="it"><img src="${p.img}" alt=""><div><b>${p.n}</b><div class="meta">${fmt(p.p)} c/u</div><div class="qty"><button data-a="-" data-id="${k}" aria-label="Quitar uno">−</button>${q}<button data-a="+" data-id="${k}" aria-label="Agregar uno">+</button></div></div><div class="ir"><b>${fmt(p.p*q)}</b><button class="rm" data-a="x" data-id="${k}" aria-label="Eliminar ${p.n} del carrito">🗑 Eliminar</button></div></div>`}).join(""):`<div class="empty" style="padding:30px 0">Tu carrito está vacío 🛍<br><button class="cta dark" data-go="catalogo">Ver catálogo</button></div>`)+(up?`<h3 class="ut">Te puede gustar</h3>${up}`:"");
+  $("items").innerHTML=(ids.length?ids.map(k=>{const p=P[k],q=cart[k];t+=p.p*q;n+=q;sv+=(p.o-p.p)*q;msg.push(`• ${q} x ${p.n} (${fmt(p.p*q)})`);return `<div class="it"><img src="${p.img}" alt=""><div><b>${p.n}</b><div class="meta">${fmt(p.p)} c/u</div><div class="qty"><button data-a="-" data-id="${k}" aria-label="Quitar uno">−</button>${q}<button data-a="+" data-id="${k}" aria-label="Agregar uno">+</button></div></div><div class="ir"><b>${fmt(p.p*q)}</b><button class="rm" data-a="x" data-id="${k}" aria-label="Eliminar ${p.n} del carrito"><svg class="sv" aria-hidden="true"><use href="#i-trash"/></svg> Eliminar</button></div></div>`}).join(""):`<div class="empty" style="padding:30px 0"><img class="ic huge" src="images/ic-cart.jpg" alt="">Tu carrito está vacío<br><button class="cta dark" data-go="catalogo">Ver catálogo</button></div>`)+(up?`<h3 class="ut">Te puede gustar</h3>${up}`:"");
   $("count").textContent=n;$("ctot").textContent=n?" · "+fmt(t):"";$("dcount").textContent=n?`(${n})`:"";$("clr").hidden=!ids.length;$("total").textContent=fmt(t);
-  $("save").hidden=!sv;$("save").textContent="🎉 Ahorras "+fmt(sv)+" en este pedido";msg.push("Total: "+fmt(t));if(nt)msg.push("Nota/dirección: "+nt);
+  $("save").hidden=!sv;$("save").innerHTML='<svg class="sv" aria-hidden="true"><use href="#i-percent"/></svg> Ahorras '+fmt(sv)+' en este pedido';msg.push("Total: "+fmt(t));if(nt)msg.push("Nota/dirección: "+nt);
   $("wa").href="https://wa.me/573216703979?text="+encodeURIComponent(msg.join("\n"));$("wa").setAttribute("aria-disabled",!ids.length);
 }
 $("items").onclick=e=>{const g=e.target.closest("[data-go]");if(g){open(false);location.hash="#"+g.dataset.go;return}const ad=e.target.closest("[data-add]");if(ad){const i=ad.dataset.add;cart[i]=(cart[i]||0)+1;save();return}const b=e.target.closest("button[data-a]");if(!b)return;const id=b.dataset.id,undo=q=>toast("Eliminado: "+P[id].n,()=>{cart[id]=q;save()});if(b.dataset.a=="x"){const q=cart[id];delete cart[id];save();undo(q);return}cart[id]+=b.dataset.a=="+"?1:-1;if(cart[id]<=0){delete cart[id];save();undo(1);return}save()};
@@ -71,8 +70,8 @@ $("clr").onclick=()=>{cart={};save();toast("Carrito vaciado")};
 function setCat(c){cat=c;term="";qi.value="";$("qc").hidden=true;[...$("chips").children].forEach(b=>b.setAttribute("aria-pressed",b.dataset.c==c));render()}
 [...$("chips").children].forEach(b=>{b.dataset.c=b.textContent;b.onclick=()=>setCat(b.dataset.c)});
 document.addEventListener("click",e=>{const a=e.target.closest("[data-cat]");if(a)setCat(a.dataset.cat)});
-const EM={Pulseras:"📿",Collares:"✨",Audífonos:"🎧",Stickers:"🌸",Aretes:"⭐",Llaveros:"🔑",Regalos:"🎁"};
-$("cats").innerHTML=Object.keys(EM).map(c=>`<a class="cat" href="#catalogo" data-cat="${c}"><span aria-hidden="true">${EM[c]}</span><b>${c}</b><small>${P.filter(p=>p.c==c).length} productos</small></a>`).join("");
+const EM={Pulseras:"bracelet",Collares:"necklace",Audífonos:"phones",Stickers:"sticker",Aretes:"earring",Llaveros:"key",Regalos:"gift"};
+$("cats").innerHTML=Object.keys(EM).map(c=>`<a class="cat" href="#catalogo" data-cat="${c}"><span aria-hidden="true"><svg class="sv"><use href="#i-${EM[c]}"/></svg></span><b>${c}</b><small>${P.filter(p=>p.c==c).length} productos</small></a>`).join("");
 $("stats").innerHTML=[[P.length,"productos"],[Object.keys(EM).length,"categorías"],["1 a 1","atención por WhatsApp"]].map(([a,b])=>`<div><b>${a}</b><span>${b}</span></div>`).join("");
 $("cname").oninput=$("cnote").oninput=drawCart;$("keep").onclick=()=>open(false);
 $("cform").onsubmit=e=>{e.preventDefault();window.open("https://wa.me/573216703979?text="+encodeURIComponent(`Hola Cositas, soy ${$("cfn").value.trim()}. ${$("cfm").value}: ${$("cfx").value.trim()}`),"_blank","noopener")};
